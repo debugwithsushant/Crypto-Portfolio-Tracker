@@ -1,6 +1,7 @@
 // src/api/tradeApi.js
+import { API_BASE_URL } from './config';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_URL = `${API_BASE_URL}/api/portfolio/trades`;
 
 // --- HARDCODED EXCHANGE NAMES ---
 const getExchangeName = (id) => {
@@ -22,10 +23,17 @@ const getAssetStyles = (symbol) => {
     }
 };
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+    };
+};
+
 const formatTrade = (trade) => {
-    // Extract exchange ID safely (it might be nested or null)
-    const exchangeId = trade.exchange?.id; 
-    
+    const exchangeId = trade.exchange?.id;
+
     return {
         id: trade.id,
         date: new Date(trade.executedAt).toLocaleString(),
@@ -35,14 +43,18 @@ const formatTrade = (trade) => {
         price: trade.price,
         fee: trade.fee,
         total: (parseFloat(trade.price) * parseFloat(trade.quantity)) - (trade.fee || 0),
-        exchange: getExchangeName(exchangeId), // Use hardcoded name
+        exchange: trade.exchangeName || getExchangeName(exchangeId),
         ...getAssetStyles(trade.assetSymbol)
     };
 };
 
+// Note: userId parameter is no longer used (kept for backward compatibility
+// with existing component calls) - the backend identifies the user from the JWT token.
 export const getUserTrades = async (userId) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/trades/${userId}`);
+        const response = await fetch(API_URL, {
+            headers: getAuthHeaders(),
+        });
         if (!response.ok) throw new Error(`Error: ${response.statusText}`);
         const data = await response.json();
         return data.map(formatTrade);
@@ -64,14 +76,14 @@ export const addTrade = async (userId, tradeData) => {
             exchange: { id: parseInt(tradeData.exchangeId) }
         };
 
-        const response = await fetch(`${API_BASE_URL}/trades/${userId}`, {
+        const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(payload)
         });
 
         if (!response.ok) throw new Error('Failed to add trade');
-        
+
         const savedTrade = await response.json();
         return formatTrade(savedTrade);
     } catch (error) {

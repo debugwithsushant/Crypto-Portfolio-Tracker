@@ -1,5 +1,7 @@
 // src/api/portfolio.js
-const API_URL = "http://localhost:8080/api/portfolio";
+import { API_BASE_URL } from "./config";
+
+const API_URL = `${API_BASE_URL}/api/portfolio`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

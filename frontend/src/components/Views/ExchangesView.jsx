@@ -123,7 +123,7 @@ const ExchangesView = ({ showToast, onNotify }) => {
     if (window.confirm(`Are you sure you want to remove the connection to ${name}?`)) {
         try {
             // 3. Call Backend API to delete
-            await deleteExchange(id);
+            await deleteExchange(name);
             showToast(`Removed ${name} connection`);
             
             // Update local state immediately (optimistic update) or fetch again

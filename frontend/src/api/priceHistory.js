@@ -1,7 +1,8 @@
 // src/api/priceHistory.js
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 
-const API_URL = 'http://localhost:8080/api/prices'; // Adjust port if your backend runs on a different port
+const API_URL = `${API_BASE_URL}/api/prices`;
 
 export const getPriceHistory = async (symbol) => {
   try {

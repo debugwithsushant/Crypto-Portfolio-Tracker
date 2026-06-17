@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Icon from '../UI/Icon';
+import { API_BASE_URL } from '../../api/config';
 
 const ReportsView = ({ showToast }) => {
     // --- STATE ---
@@ -22,24 +23,17 @@ const ReportsView = ({ showToast }) => {
             const token = localStorage.getItem('token'); // Assuming you store JWT here
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            const portRes = await fetch('http://localhost:8080/api/portfolio/dashboard', { headers });
+            const portRes = await fetch(`${API_BASE_URL}/api/portfolio/dashboard`, { headers });
             if (!portRes.ok) throw new Error("Failed to fetch portfolio");
             const portData = await portRes.json();
             setPortfolio(portData);
 
             // 2. Fetch Trades
-            // NOTE: TradeController requires userId in URL. 
-            // Replace '1' with actual logged-in user ID logic from your app.
-            const currentUserId = 1; 
-            
-            // Basic date filtering logic for the fetch URL (optional based on your controller)
+            // Backend identifies the user from the JWT token automatically, no userId needed.
             const start = `${startDate}T00:00:00`;
             const end = `${endDate}T23:59:59`;
 
-            // Note: Your backend TradeController GET maps simply to /{userId}. 
-            // If you want date filtering, you'd need to update TradeController to accept @RequestParam.
-            // For now, we fetch all and filter in JS or accept all data.
-            const tradesRes = await fetch(`http://localhost:8080/api/trades/${currentUserId}`, { headers });
+            const tradesRes = await fetch(`${API_BASE_URL}/api/portfolio/trades`, { headers });
             if (!tradesRes.ok) throw new Error("Failed to fetch trades");
             const tradesData = await tradesRes.json();
             
